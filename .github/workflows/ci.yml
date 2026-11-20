@@ -1,0 +1,101 @@
+name: ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  # Fast lane: everything except the spawn-based integration suite. All steps
+  # run through Rush (install-run-rush bootstraps the pinned rush + pnpm).
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
+        with:
+          fetch-depth: 0 # rush change --verify diffs against origin/main
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 26
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            common/temp/pnpm-store
+            ~/.rush
+          key: rush-${{ hashFiles('common/config/rush/pnpm-lock.yaml') }}
+          restore-keys: rush-
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: common/temp/build-cache
+          key: rush-buildcache-${{ github.sha }}
+          restore-keys: rush-buildcache-
+      - run: node common/scripts/install-run-rush.js install
+      - name: Public npm release regression tests
+        run: node --test scripts/release-npm.test.mjs
+      - name: Verify public exporter copies
+        run: sha256sum --strict -c .public-export-source
+      - name: Install gitleaks (pinned, checksum-verified)
+        run: |
+          set -euo pipefail
+          v=8.21.2
+          sum=5bc41815076e6ed6ef8fbecc9d9b75bcae31f39029ceb55da08086315316e3ba
+          f="gitleaks_${v}_linux_x64.tar.gz"
+          curl -fsSLo "$RUNNER_TEMP/$f" "https://github.com/gitleaks/gitleaks/releases/download/v${v}/$f"
+          echo "$sum  $RUNNER_TEMP/$f" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/$f" -C "$RUNNER_TEMP" gitleaks
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+      - name: Check filtered public HEAD
+        run: |
+          scripts/public-export.sh "$RUNNER_TEMP/rush-public-export"
+          scripts/public-export-check.sh "$RUNNER_TEMP/rush-public-export"
+      - name: rush change --verify (PRs must carry changefiles)
+        if: github.event_name == 'pull_request'
+        run: node common/scripts/install-run-rush.js change --verify
+      - run: node common/scripts/install-run-rush.js build
+      - run: node common/scripts/install-run-rush.js typecheck
+      - run: node common/scripts/install-run-rush.js lint
+      - run: node common/scripts/install-run-rush.js format:check
+      - name: unit tests (plugins only)
+        run: >-
+          node common/scripts/install-run-rush.js test
+          --to @butshouldwe/sbom-rush
+          --to @butshouldwe/fallow-rush
+          --to @butshouldwe/worktree-rush
+      # config-rush proves permission refusals; root ignores file modes, so it runs unprivileged.
+      - name: unit tests (config-rush, unprivileged)
+        run: bash common/scripts/test-unprivileged.sh packages/config-rush
+      - name: publish checks (publint + attw)
+        run: node common/scripts/install-run-rush.js publish-check
+  # Integration lane: the testbed spawns the fixture's own rush against a
+  # nested Rush workspace, so it caches the fixture's pnpm-store separately.
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 26
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            common/temp/pnpm-store
+            ~/.rush
+            packages/rush-testbed/fixture/common/temp/pnpm-store
+          key: rush-integration-${{ hashFiles('common/config/rush/pnpm-lock.yaml', 'packages/rush-testbed/fixture/common/config/rush/pnpm-lock.yaml') }}
+          restore-keys: rush-integration-
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: common/temp/build-cache
+          key: rush-buildcache-${{ github.sha }}
+          restore-keys: rush-buildcache-
+      - run: node common/scripts/install-run-rush.js install
+      - run: node common/scripts/install-run-rush.js build
+      - name: integration tests (testbed)
+        run: node common/scripts/install-run-rush.js test --only @butshouldwe/rush-testbed
+      - name: §0 no-mutation rule
+        run: test -z "$(git status --porcelain packages/rush-testbed)"

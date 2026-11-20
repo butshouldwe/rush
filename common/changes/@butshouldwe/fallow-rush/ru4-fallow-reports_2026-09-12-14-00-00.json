@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Harden report integrity with safe writes, ownership and containment guards, serialized output, safe rendering, collision checks, and complete Fallow findings gating.",
+      "type": "patch",
+      "packageName": "@butshouldwe/fallow-rush"
+    }
+  ],
+  "packageName": "@butshouldwe/fallow-rush",
+  "email": "hermes@butshouldwe.com"
+}

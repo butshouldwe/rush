@@ -1,0 +1,97 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
+  "phases": [
+    {
+      "name": "_phase:build",
+      "dependencies": { "upstream": ["_phase:build"] },
+      "ignoreMissingScript": true,
+      "allowWarningsOnSuccess": true
+    },
+    {
+      "name": "_phase:typecheck",
+      "dependencies": { "upstream": ["_phase:build"] },
+      "allowWarningsOnSuccess": true
+    },
+    {
+      "name": "_phase:lint",
+      "allowWarningsOnSuccess": true
+    },
+    {
+      "name": "_phase:test",
+      "dependencies": { "self": ["_phase:build"], "upstream": ["_phase:build"] },
+      "allowWarningsOnSuccess": true
+    },
+    {
+      "name": "_phase:publish-check",
+      "dependencies": { "self": ["_phase:build"] },
+      "ignoreMissingScript": true,
+      "allowWarningsOnSuccess": false
+    }
+  ],
+  "commands": [
+    {
+      "commandKind": "phased",
+      "name": "build",
+      "summary": "Build every project (tsdown), incremental + build-cached",
+      "description": "Runs _phase:build in dependency order; restored from the build cache when inputs are unchanged.",
+      "enableParallelism": true,
+      "incremental": true,
+      "phases": ["_phase:build"]
+    },
+    {
+      "commandKind": "phased",
+      "name": "typecheck",
+      "summary": "Type-check every project (TypeScript 7 native tsc --noEmit)",
+      "description": "Runs _phase:typecheck after upstream builds; cached by input hash.",
+      "enableParallelism": true,
+      "incremental": true,
+      "phases": ["_phase:typecheck"]
+    },
+    {
+      "commandKind": "phased",
+      "name": "lint",
+      "summary": "Lint every project (oxlint), cached by input hash",
+      "description": "Runs _phase:lint per project; correctness gates as error, suspicious/perf warn.",
+      "enableParallelism": true,
+      "incremental": true,
+      "phases": ["_phase:lint"]
+    },
+    {
+      "commandKind": "phased",
+      "name": "test",
+      "summary": "Test every project (vitest); builds first, cached by input hash",
+      "description": "Runs _phase:test after this project and its dependencies are built (the testbed packs the built plugins).",
+      "enableParallelism": true,
+      "incremental": true,
+      "phases": ["_phase:build", "_phase:test"]
+    },
+    {
+      "commandKind": "phased",
+      "name": "publish-check",
+      "summary": "Validate publishable package metadata (publint + attw)",
+      "description": "Runs _phase:publish-check after the project builds — publint checks the published shape (exports, files, types), attw checks the type resolution across module modes. Private packages have no such script and are skipped via ignoreMissingScript.",
+      "enableParallelism": true,
+      "incremental": true,
+      "phases": ["_phase:build", "_phase:publish-check"]
+    },
+    {
+      "commandKind": "global",
+      "name": "format",
+      "summary": "Format all source with oxfmt (writes in place)",
+      "description": "Repo-wide formatter (config .oxfmtrc.json). Not a cached per-project phase — it mutates files.",
+      "shellCommand": "oxfmt --write packages",
+      "autoinstallerName": "rush-tools",
+      "safeForSimultaneousRushProcesses": true
+    },
+    {
+      "commandKind": "global",
+      "name": "format:check",
+      "summary": "Check formatting with oxfmt (CI gate)",
+      "description": "Fails if any file is not oxfmt-formatted.",
+      "shellCommand": "oxfmt --check packages",
+      "autoinstallerName": "rush-tools",
+      "safeForSimultaneousRushProcesses": true
+    }
+  ],
+  "parameters": []
+}

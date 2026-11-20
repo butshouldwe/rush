@@ -1,0 +1,51 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/pnpm-config.schema.json",
+  "useWorkspaces": true,
+  /**
+   * Security remediation pins (Dependabot alerts). pnpm 10 reads overrides
+   * from here in a Rush repo, not from a package.json "pnpm" field. Versions
+   * verified against the advisories: js-yaml >=5.2.2 fixes the merge-key DoS
+   * and GHSA-pm4m-ph32-ghv5 (the ^5.2.1 this pin used to carry became
+   * vulnerable in its own right once that advisory landed — a caret is not
+   * self-healing when the lockfile already sits on the floor);
+   * @modelcontextprotocol/sdk >=1.29.0 clears the ReDoS + data-leak +
+   * DNS-rebinding advisories.
+   *
+   * @hono/node-server >=2.0.5 fixes GHSA-frvp-7c67-39w9 (serve-static path
+   * traversal on Windows via encoded backslash). It arrives via
+   * @rushstack/mcp-server -> @modelcontextprotocol/sdk, which pins ^1.19.9 and
+   * so cannot reach the fix on its own. The major bump is safe here: the SDK
+   * imports only `getRequestListener`, never the affected `serveStatic`, and
+   * 2.x keeps the same `hono@^4` peer (its engines floor moves to node >=20,
+   * below this repo's >=22).
+   *
+   * fast-uri >=3.1.4 fixes GHSA-v2hh-gcrm-f6hx (host confusion via a literal
+   * backslash authority delimiter). ajv's own `^3.0.1` range already admits
+   * the fix, so drop this pin once the lockfile is refreshed past it.
+   *
+   * tar >=7.5.21 fixes GHSA-r292-9mhp-454m. It arrives via
+   * @microsoft/rush-lib, so the floor only moves when Rush itself ships a
+   * newer tar — pinned here rather than waiting on that.
+   *
+   * brace-expansion >=5.0.8 fixes GHSA-mh99-v99m-4gvg. Note the selector is
+   * scoped to the 5.x line on purpose. The advisory declares `<= 5.0.7`
+   * vulnerable and names 5.0.8 as the only patch, so it nominally sweeps in
+   * the 1.1.16 and 2.1.2 copies this tree also carries — but those lines have
+   * no patched release, and their dependents cannot take a 5.x. Three
+   * minimatch majors are live here: 10.2.3 wants ^5.0.5 (the one Dependabot
+   * flagged, and the one this pin moves), while 3.1.5 wants ^1.1.7 and 5.1.9
+   * wants ^2.0.1. An unscoped `brace-expansion` pin would force all three to
+   * 5.0.8 and break the older two.
+   */
+  "globalOverrides": {
+    "@hono/node-server": "^2.0.5",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "brace-expansion@5": "^5.0.8",
+    "fast-uri": "^3.1.4",
+    "js-yaml": "^5.2.2",
+    "tar": "^7.5.21"
+  },
+  "globalAllowBuilds": {
+    "msgpackr-extract": true
+  }
+}

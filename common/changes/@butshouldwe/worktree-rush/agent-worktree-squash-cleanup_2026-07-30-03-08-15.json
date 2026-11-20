@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Safely recognize squash-merged branches during proof-bearing worktree removal.",
+      "type": "minor",
+      "packageName": "@butshouldwe/worktree-rush"
+    }
+  ],
+  "packageName": "@butshouldwe/worktree-rush",
+  "email": "hermes@butshouldwe.com"
+}

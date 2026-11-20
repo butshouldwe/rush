@@ -1,0 +1,49 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
+  "commands": [
+    {
+      "commandKind": "global",
+      "name": "sbom",
+      "summary": "Generate one CycloneDX SBOM per deployed artifact from rush deploy output",
+      "description": "Discovers rush deploy scenarios (common/config/rush/deploy-*.json), locates each scenario's deploy output, and generates one validated CycloneDX 1.6 SBOM per scenario plus a manifest.json index. Requires `rush deploy` to have run first. This plugin must be installed in an autoinstaller named \"rush-plugins\".",
+      "safeForSimultaneousRushProcesses": true,
+      "autoinstallerName": "rush-plugins",
+      "shellCommand": "sbom-rush"
+    }
+  ],
+  "parameters": [
+    {
+      "parameterKind": "stringList",
+      "longName": "--scenario",
+      "argumentName": "SCENARIO",
+      "description": "Limit to the named deploy scenario(s). Default: every common/config/rush/deploy-*.json.",
+      "associatedCommands": ["sbom"]
+    },
+    {
+      "parameterKind": "string",
+      "longName": "--target-folder",
+      "argumentName": "PATH",
+      "description": "Scan this deploy folder directly, bypassing scenario discovery.",
+      "associatedCommands": ["sbom"]
+    },
+    {
+      "parameterKind": "string",
+      "longName": "--out",
+      "argumentName": "DIR",
+      "description": "Output directory for SBOMs and manifest.json. Default: common/deploy-sbom.",
+      "associatedCommands": ["sbom"]
+    },
+    {
+      "parameterKind": "flag",
+      "longName": "--fail-on-invalid",
+      "description": "Exit 3 if any generated SBOM fails CycloneDX 1.6 schema validation.",
+      "associatedCommands": ["sbom"]
+    },
+    {
+      "parameterKind": "flag",
+      "longName": "--json",
+      "description": "Print the run result as JSON on stdout.",
+      "associatedCommands": ["sbom"]
+    }
+  ]
+}

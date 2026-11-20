@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Prepare public npm metadata and configurable registry routing.",
+      "type": "patch",
+      "packageName": "@butshouldwe/worktree-rush"
+    }
+  ],
+  "packageName": "@butshouldwe/worktree-rush",
+  "email": "chief@butshouldwe.local"
+}

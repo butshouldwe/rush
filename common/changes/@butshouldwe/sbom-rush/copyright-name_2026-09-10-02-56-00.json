@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Correct the LICENSE holder name to Steve Dalonzo (no apostrophe).",
+      "type": "none",
+      "packageName": "@butshouldwe/sbom-rush"
+    }
+  ],
+  "packageName": "@butshouldwe/sbom-rush",
+  "email": "hermes@butshouldwe.com"
+}

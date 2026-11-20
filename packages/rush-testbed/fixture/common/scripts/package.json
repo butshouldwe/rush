@@ -1,0 +1,4 @@
+{
+  "comment": "Scope marker only. The install-run*.js scripts that Rush generates here are CommonJS, but this fixture lives under rush-testbed's \"type\": \"module\" package.json, so without this marker Node treats them as ESM and they crash (breaking rush-sdk consumers such as @rushstack/mcp-server). A real Rush repo has no such ancestor; this file restores stock behavior.",
+  "type": "commonjs"
+}

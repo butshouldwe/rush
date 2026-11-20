@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@butshouldwe/config-rush",
+      "comment": "Preserve documents byte-for-byte where they are not edited: arrays and objects follow the file's inferred indentation, ambiguous indentation is refused, `unset` below a scalar is a no-op with a note, and plan staleness is compared structurally so key-order round-trips are not stale.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@butshouldwe/config-rush"
+}

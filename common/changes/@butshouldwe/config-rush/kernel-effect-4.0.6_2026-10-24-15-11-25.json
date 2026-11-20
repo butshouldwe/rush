@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Upgrade Effect runtime to 4.0.6",
+      "type": "patch",
+      "packageName": "@butshouldwe/config-rush"
+    }
+  ],
+  "packageName": "@butshouldwe/config-rush",
+  "email": "hermes@butshouldwe.com"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add creation-only --start-point support with local commit validation.",
+      "type": "minor",
+      "packageName": "@butshouldwe/worktree-rush"
+    }
+  ],
+  "packageName": "@butshouldwe/worktree-rush",
+  "email": "hermes@butshouldwe.com"
+}

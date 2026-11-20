@@ -1,0 +1,20 @@
+node_modules/
+dist/
+*.tgz
+*.log
+.DS_Store
+
+# Rush (outer repo)
+common/temp/
+common/deploy/
+**/.rush/temp/
+npm-debug.log*
+common/deploy-sbom/
+
+# pnpm store fallback (CI containers land a store at <repo>/.pnpm-store when
+# the workspace mount is cross-device); Rush 5.178 repo-state hashing aborts
+# on untracked non-file paths.
+.pnpm-store/
+
+# Vendored published-plugin tarballs (ADR 0002 amendment) are tracked
+!common/autoinstallers/*/vendor/*.tgz

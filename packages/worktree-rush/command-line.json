@@ -1,0 +1,91 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
+  "commands": [
+    {
+      "commandKind": "global",
+      "name": "worktree-create",
+      "summary": "Create (or converge) a git worktree with dependencies materialized and agent state bootstrapped",
+      "description": "Creates a worktree at the family convention path (../.worktrees/<repo>/<branch>), materializes dependencies (rush install, sharing the source checkout's pnpm store and build cache), and seeds agent state (Claude trust/permissions/MCP approvals, .claude/settings.local.json) so the first session in the worktree starts with zero interactive prompts. Re-running against an existing same-branch worktree converges it (repairs/completes the bootstrap) instead of refusing. Reports per-stage timings. Rush global commands take no positional arguments, so the branch is passed via --branch (standalone `worktree-rush create <branch>` accepts a positional). This plugin must be installed in an autoinstaller named \"rush-plugins\".",
+      "safeForSimultaneousRushProcesses": true,
+      "autoinstallerName": "rush-plugins",
+      "shellCommand": "worktree-rush create"
+    },
+    {
+      "commandKind": "global",
+      "name": "worktree-remove",
+      "summary": "Remove a worktree created by worktree-create, including its seeded agent state",
+      "description": "The symmetric inverse of worktree-create: performs a read-only dirty-tree and merge-proof preflight, removes the worktree at the family convention path, deletes the authorized branch, prunes the seeded ~/.claude.json project entry, and runs `git worktree prune`. --merged-into accepts ancestry or exact tree equivalence for squash merges; --force bypasses proof and is mutually exclusive with it. Already-absent worktrees/branches are success, not errors. Rush global commands take no positional arguments, so the branch is passed via --branch (standalone `worktree-rush remove <branch>` accepts a positional).",
+      "safeForSimultaneousRushProcesses": true,
+      "autoinstallerName": "rush-plugins",
+      "shellCommand": "worktree-rush remove"
+    }
+  ],
+  "parameters": [
+    {
+      "parameterKind": "string",
+      "longName": "--branch",
+      "argumentName": "NAME",
+      "description": "Branch name for the worktree. Required.",
+      "required": true,
+      "associatedCommands": ["worktree-create", "worktree-remove"]
+    },
+    {
+      "parameterKind": "string",
+      "longName": "--from",
+      "argumentName": "PATH",
+      "description": "Source checkout to inherit state from (create) or that the worktree belongs to (remove). Default: the repo the command runs in.",
+      "associatedCommands": ["worktree-create", "worktree-remove"]
+    },
+    {
+      "parameterKind": "stringList",
+      "longName": "--to",
+      "argumentName": "PROJECT",
+      "description": "Filtered install: forwarded to `rush install --to <PROJECT>` (repeatable). The checkout stays full; only dependency materialization narrows.",
+      "associatedCommands": ["worktree-create"]
+    },
+    {
+      "parameterKind": "string",
+      "longName": "--start-point",
+      "argumentName": "REF",
+      "description": "Resolve this local ref and use its commit only when creating a new local branch. Existing branches/worktrees are never moved, and no fetch is performed.",
+      "associatedCommands": ["worktree-create"]
+    },
+    {
+      "parameterKind": "flag",
+      "longName": "--no-install",
+      "description": "Skip dependency materialization (git worktree + state bootstrap only).",
+      "associatedCommands": ["worktree-create"]
+    },
+    {
+      "parameterKind": "flag",
+      "longName": "--no-warm-claude",
+      "description": "Skip the agent-state bootstrap (trust/permissions/MCP seeding and settings.local.json copy).",
+      "associatedCommands": ["worktree-create"]
+    },
+    {
+      "parameterKind": "flag",
+      "longName": "--no-share-store",
+      "description": "Do not link the source checkout's pnpm store and build cache into the worktree before installing.",
+      "associatedCommands": ["worktree-create"]
+    },
+    {
+      "parameterKind": "flag",
+      "longName": "--force",
+      "description": "Remove a dirty worktree / delete an unmerged branch (git's own --force semantics).",
+      "associatedCommands": ["worktree-remove"]
+    },
+    {
+      "parameterKind": "string",
+      "longName": "--merged-into",
+      "argumentName": "REF",
+      "description": "Resolve this local commit and prove ancestry or exact tree equivalence before removal. No fetch or remote inference is performed; mutually exclusive with --force.",
+      "associatedCommands": ["worktree-remove"]
+    },
+    {
+      "parameterKind": "flag",
+      "longName": "--json",
+      "description": "Print the stage-timing report as JSON on stdout.",
+      "associatedCommands": ["worktree-create", "worktree-remove"]
+    }
+  ]
+}

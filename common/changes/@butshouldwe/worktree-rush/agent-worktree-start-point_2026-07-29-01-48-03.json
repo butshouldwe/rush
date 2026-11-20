@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Normalize package manifest key order required by the pinned formatter.",
+      "type": "none",
+      "packageName": "@butshouldwe/worktree-rush"
+    }
+  ],
+  "packageName": "@butshouldwe/worktree-rush",
+  "email": "hermes@butshouldwe.com"
+}

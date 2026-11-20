@@ -1,0 +1,7 @@
+# Rush copies this into an isolated publish HOME; missing-env auth lines are disabled.
+# Public npm is the default. Internal publishing must explicitly select its
+# registry via `rush publish --registry <url>` and supply a matching auth path
+# (//host/path/) through BUTSHOULDWE_NPM_AUTH_PATH. No credential values here.
+registry=https://registry.npmjs.org/
+//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}
+${BUTSHOULDWE_NPM_AUTH_PATH}:_authToken=${NPM_AUTH_TOKEN}

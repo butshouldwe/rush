@@ -1,0 +1,7 @@
+{
+  "includeEntryExports": true,
+  "ignoreExports": [
+    { "file": "projects/web-app/src/index.js", "exports": ["*"] },
+    { "file": "projects/docs-site/src/index.js", "exports": ["*"] }
+  ]
+}

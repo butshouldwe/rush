@@ -1,0 +1,49 @@
+/**
+ * The Rush monorepo root for @butshouldwe's Rush plugin library. This repo
+ * dogfoods Rush: its own plugins are built, linted, typechecked, tested,
+ * versioned, and published through Rush itself.
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush.schema.json",
+  "rushVersion": "5.181.0",
+  "pnpmVersion": "12.6.0",
+  "nodeSupportedVersionRange": ">=22.0.0 <27.0.0",
+  "ensureConsistentVersions": true,
+  "projectFolderMinDepth": 2,
+  "projectFolderMaxDepth": 2,
+  "projects": [
+    {
+      "packageName": "@butshouldwe/config-rush",
+      "projectFolder": "packages/config-rush",
+      "versionPolicyName": "plugins",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@butshouldwe/sbom-rush",
+      "projectFolder": "packages/sbom-rush",
+      "versionPolicyName": "plugins",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@butshouldwe/fallow-rush",
+      "projectFolder": "packages/fallow-rush",
+      "versionPolicyName": "plugins",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@butshouldwe/worktree-rush",
+      "projectFolder": "packages/worktree-rush",
+      "versionPolicyName": "plugins",
+      "shouldPublish": true
+    },
+    {
+      // Private testbed. Never published. Its `fixture/` subfolder is a
+      // SEPARATE, self-contained Rush workspace used only as integration-test
+      // data — it is deliberately not a project of this outer repo, and the
+      // integration harness drives it through its own pinned rush binary.
+      "packageName": "@butshouldwe/rush-testbed",
+      "projectFolder": "packages/rush-testbed",
+      "shouldPublish": false
+    }
+  ]
+}

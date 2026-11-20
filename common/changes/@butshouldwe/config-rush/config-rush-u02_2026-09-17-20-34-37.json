@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@butshouldwe/config-rush",
+      "comment": "Add safe authoring for project-local configuration: `config-preview` turns a request of set/unset/suppress/init/set-version edits into an exact byte-level plan, `config-apply` applies a plan as a whole after re-checking every input it observed (each file atomically; a late failure stops later writes and leaves earlier ones in place, reported as partial), and `config-status` reconciles an interrupted operation read-only from its journal. Writes are staged beside the target and published atomically; shared, rig and inherited sources are never edited.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@butshouldwe/config-rush"
+}

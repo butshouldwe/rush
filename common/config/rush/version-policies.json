@@ -1,0 +1,11 @@
+/**
+ * The three published plugins version independently — each bumps from its own
+ * `rush change` changefiles, and `rush version` writes each project's
+ * CHANGELOG. rush-testbed is private (shouldPublish:false) and needs no policy.
+ */
+[
+  {
+    "definitionName": "individualVersion",
+    "policyName": "plugins"
+  }
+]

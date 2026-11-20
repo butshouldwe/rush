@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Bind workspace-fallback dependency versions and shipped-project splits to the selected deployment.",
+      "type": "patch",
+      "packageName": "@butshouldwe/sbom-rush"
+    }
+  ],
+  "packageName": "@butshouldwe/sbom-rush",
+  "email": "hermes@butshouldwe.com"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "OSS readiness: root LICENSE + CONTRIBUTING; README verify/layout fixes; add bugs metadata; publish checks (publint + attw) wired into CI.",
+      "type": "none",
+      "packageName": "@butshouldwe/fallow-rush"
+    }
+  ],
+  "packageName": "@butshouldwe/fallow-rush",
+  "email": "hermes@butshouldwe.com"
+}

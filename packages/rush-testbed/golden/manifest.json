@@ -1,0 +1,23 @@
+{
+  "generator": "@butshouldwe/sbom-rush",
+  "scenarios": {
+    "docs": {
+      "mainProject": "docs-site",
+      "file": "docs.cdx.json",
+      "componentCount": 1,
+      "valid": true,
+      "ntiaSatisfied": false,
+      "rung": 2,
+      "error": null
+    },
+    "web": {
+      "mainProject": "web-app",
+      "file": "web.cdx.json",
+      "componentCount": 5,
+      "valid": true,
+      "ntiaSatisfied": false,
+      "rung": 2,
+      "error": null
+    }
+  }
+}

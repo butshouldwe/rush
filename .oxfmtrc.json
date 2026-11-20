@@ -1,0 +1,28 @@
+{
+  "useTabs": false,
+  "tabWidth": 2,
+  "printWidth": 100,
+  "singleQuote": true,
+  "jsxSingleQuote": false,
+  "quoteProps": "as-needed",
+  "trailingComma": "all",
+  "semi": true,
+  "arrowParens": "always",
+  "bracketSameLine": false,
+  "bracketSpacing": true,
+  "ignorePatterns": [
+    "packages/rush-testbed/fixture",
+    "**/dist",
+    "**/node_modules",
+    "packages/sbom-rush/schemas",
+    "packages/rush-testbed/golden",
+    "pnpm-lock.yaml",
+    "common/scripts",
+    "common/autoinstallers",
+    "common/temp",
+    ".agents",
+    ".claude",
+    "*.md",
+    "**/__fixtures__"
+  ]
+}

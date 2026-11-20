@@ -1,0 +1,1 @@
+{"changes":[{"comment":"Canonicalize removal paths, enforce owned Claude-state locking, and fail touched-file validation safely.","type":"patch","packageName":"@butshouldwe/worktree-rush"}],"packageName":"@butshouldwe/worktree-rush","email":"hermes@butshouldwe.com"}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Support Node 25 and 26 in config-rush.",
+      "type": "patch",
+      "packageName": "@butshouldwe/config-rush"
+    }
+  ],
+  "packageName": "@butshouldwe/config-rush",
+  "email": "test@example.com"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Bind generated SBOMs to complete deployed inventories and make lock, hash, scenario, and output publication collision-safe.",
+      "type": "patch",
+      "packageName": "@butshouldwe/sbom-rush"
+    }
+  ],
+  "packageName": "@butshouldwe/sbom-rush",
+  "email": "hermes@butshouldwe.com"
+}

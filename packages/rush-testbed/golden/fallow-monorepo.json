@@ -1,0 +1,168 @@
+{
+  "generator": "@butshouldwe/fallow-rush",
+  "fallowVersion": "3.6.0",
+  "gitSha": "<sha>",
+  "changedSince": null,
+  "projectsFilter": null,
+  "monorepo": {
+    "totalFindings": 5,
+    "byType": {
+      "unused-export": 2,
+      "circular-dependency": 1,
+      "dev-dependency-in-production": 1,
+      "unused-dependency": 1
+    },
+    "dupes": {},
+    "health": {
+      "files-analyzed": 12,
+      "functions-analyzed": 90,
+      "files-scored": 11,
+      "average-maintainability": 86.2,
+      "severity-critical-count": 2,
+      "severity-high-count": 3,
+      "severity-moderate-count": 6
+    },
+    "unsupported": [],
+    "rushPlumbing": [
+      {
+        "type": "unused-file",
+        "project": "(rush)",
+        "path": "common/scripts/install-run-rush-pnpm.js",
+        "detail": "file is never imported by any entry point",
+        "source": "root-pass"
+      },
+      {
+        "type": "unused-file",
+        "project": "(rush)",
+        "path": "common/scripts/install-run-rush.js",
+        "detail": "file is never imported by any entry point",
+        "source": "root-pass"
+      },
+      {
+        "type": "unused-file",
+        "project": "(rush)",
+        "path": "common/scripts/install-run-rushx.js",
+        "detail": "file is never imported by any entry point",
+        "source": "root-pass"
+      },
+      {
+        "type": "unused-file",
+        "project": "(rush)",
+        "path": "common/scripts/install-run.js",
+        "detail": "file is never imported by any entry point",
+        "source": "root-pass"
+      }
+    ],
+    "unattributed": []
+  },
+  "projects": [
+    {
+      "project": "build-tool",
+      "projectFolder": "projects/build-tool",
+      "counts": {
+        "unused-export": 1
+      },
+      "findings": [
+        {
+          "type": "unused-export",
+          "project": "build-tool",
+          "path": "projects/build-tool/src/index.js",
+          "detail": "export `banner` is never imported anywhere in the monorepo",
+          "source": "root-pass"
+        }
+      ]
+    },
+    {
+      "project": "docs-site",
+      "projectFolder": "projects/docs-site",
+      "counts": {},
+      "findings": []
+    },
+    {
+      "project": "lib-a",
+      "projectFolder": "projects/lib-a",
+      "counts": {},
+      "findings": []
+    },
+    {
+      "project": "lib-b",
+      "projectFolder": "projects/lib-b",
+      "counts": {
+        "unused-export": 1
+      },
+      "findings": [
+        {
+          "type": "unused-export",
+          "project": "lib-b",
+          "path": "projects/lib-b/src/index.js",
+          "detail": "export `deadHelper` is never imported anywhere in the monorepo",
+          "source": "root-pass"
+        }
+      ]
+    },
+    {
+      "project": "lib-c",
+      "projectFolder": "projects/lib-c",
+      "counts": {
+        "circular-dependency": 1
+      },
+      "findings": [
+        {
+          "type": "circular-dependency",
+          "project": "lib-c",
+          "path": "projects/lib-c/src/index.js ⇄ projects/lib-d/src/index.js",
+          "detail": "cross-package import cycle: projects/lib-c/src/index.js → projects/lib-d/src/index.js",
+          "source": "root-pass",
+          "crossProject": [
+            "lib-c",
+            "lib-d"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "lib-d",
+      "projectFolder": "projects/lib-d",
+      "counts": {
+        "circular-dependency": 1
+      },
+      "findings": [
+        {
+          "type": "circular-dependency",
+          "project": "lib-d",
+          "path": "projects/lib-c/src/index.js ⇄ projects/lib-d/src/index.js",
+          "detail": "cross-package import cycle: projects/lib-c/src/index.js → projects/lib-d/src/index.js",
+          "source": "root-pass",
+          "crossProject": [
+            "lib-c",
+            "lib-d"
+          ]
+        }
+      ]
+    },
+    {
+      "project": "web-app",
+      "projectFolder": "projects/web-app",
+      "counts": {
+        "dev-dependency-in-production": 1,
+        "unused-dependency": 1
+      },
+      "findings": [
+        {
+          "type": "dev-dependency-in-production",
+          "project": "web-app",
+          "path": "projects/web-app/package.json",
+          "detail": "devDependency `is-odd` is used by production code",
+          "source": "project-pass"
+        },
+        {
+          "type": "unused-dependency",
+          "project": "web-app",
+          "path": "projects/web-app/package.json",
+          "detail": "dependency `mri` is declared but never imported",
+          "source": "project-pass"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-plugins.schema.json",
+  "plugins": [
+    {
+      "packageName": "@butshouldwe/sbom-rush",
+      "pluginName": "sbom-rush-plugin",
+      "autoinstallerName": "rush-plugins"
+    },
+    {
+      "packageName": "@butshouldwe/fallow-rush",
+      "pluginName": "fallow-rush-plugin",
+      "autoinstallerName": "rush-plugins"
+    }
+  ]
+}

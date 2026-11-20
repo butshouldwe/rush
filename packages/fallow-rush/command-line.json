@@ -1,0 +1,65 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
+  "commands": [
+    {
+      "commandKind": "global",
+      "name": "fallow",
+      "summary": "Run Fallow across the monorepo with per-project attribution",
+      "description": "Two-pass Fallow scan (monorepo-aware root pass + per-project dependency hygiene), rolled up per Rush project (rush.json is the source of truth) as JSON + Markdown. Reporting only. This plugin must be installed in an autoinstaller named \"rush-plugins\".",
+      "safeForSimultaneousRushProcesses": false,
+      "autoinstallerName": "rush-plugins",
+      "shellCommand": "fallow-rush"
+    },
+    {
+      "commandKind": "global",
+      "name": "fallow-mcp",
+      "summary": "Start Fallow's bundled MCP server (stdio)",
+      "description": "Thin exec passthrough to the fallow-mcp binary bundled with the pinned fallow version. Rush global commands do not take positional arguments, so `rush fallow mcp` is spelled `rush fallow-mcp`. Wiring snippet: HERMES-WIRING.md in @butshouldwe/fallow-rush.",
+      "safeForSimultaneousRushProcesses": true,
+      "autoinstallerName": "rush-plugins",
+      "shellCommand": "fallow-rush mcp"
+    }
+  ],
+  "parameters": [
+    {
+      "parameterKind": "string",
+      "longName": "--changed-since",
+      "argumentName": "REF",
+      "description": "Only report issues in files changed since this git ref (passed through to fallow).",
+      "associatedCommands": ["fallow"]
+    },
+    {
+      "parameterKind": "stringList",
+      "longName": "--project",
+      "argumentName": "NAME",
+      "description": "Narrow to the named Rush project(s).",
+      "associatedCommands": ["fallow"]
+    },
+    {
+      "parameterKind": "string",
+      "longName": "--out",
+      "argumentName": "DIR",
+      "description": "Report directory (default: common/temp/fallow-rush). A scoped run (--project/--changed-since) that would overwrite a report recorded for a different project scope refuses unless --out is given explicitly.",
+      "associatedCommands": ["fallow"]
+    },
+    {
+      "parameterKind": "string",
+      "longName": "--report",
+      "argumentName": "DIR",
+      "description": "Deprecated alias of --out; errors if both are given.",
+      "associatedCommands": ["fallow"]
+    },
+    {
+      "parameterKind": "flag",
+      "longName": "--fail-on-findings",
+      "description": "Exit 3 when any attributed finding or unsupported Fallow category exists.",
+      "associatedCommands": ["fallow"]
+    },
+    {
+      "parameterKind": "flag",
+      "longName": "--json",
+      "description": "Print the rollup JSON on stdout.",
+      "associatedCommands": ["fallow"]
+    }
+  ]
+}

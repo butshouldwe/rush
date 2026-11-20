@@ -1,0 +1,307 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
+  "commands": [
+    {
+      "commandKind": "global",
+      "name": "config-discover",
+      "summary": "List project configuration domains and exact projects",
+      "description": "Lists the registered configuration domains and the exact project names that can be queried or authored. Read-only; validates nothing. Output is JSON with --json.",
+      "safeForSimultaneousRushProcesses": true,
+      "autoinstallerName": "rush-plugins",
+      "shellCommand": "config-rush discover"
+    },
+    {
+      "commandKind": "global",
+      "name": "config-get",
+      "summary": "Read validated effective project configuration",
+      "description": "Resolves one domain for one project (exact package name) through its rig, inheritance and suppression chain and prints the effective document. Read-only; exit 2 when the project or domain is unknown or the document is invalid.",
+      "safeForSimultaneousRushProcesses": true,
+      "autoinstallerName": "rush-plugins",
+      "shellCommand": "config-rush get"
+    },
+    {
+      "commandKind": "global",
+      "name": "config-explain",
+      "summary": "Explain configuration sources and failures",
+      "description": "Shows where every field of a project's effective document comes from (local, inherited, rig, suppressed) so a value can be traced to the file that set it. Read-only.",
+      "safeForSimultaneousRushProcesses": true,
+      "autoinstallerName": "rush-plugins",
+      "shellCommand": "config-rush explain"
+    },
+    {
+      "commandKind": "global",
+      "name": "config-validate",
+      "summary": "Validate selected project configuration",
+      "description": "Validates every registered document offline against the pinned schemas and the applicability policy. Read-only; exit 2 lists every failing file with a diagnostic code.",
+      "safeForSimultaneousRushProcesses": true,
+      "autoinstallerName": "rush-plugins",
+      "shellCommand": "config-rush validate"
+    },
+    {
+      "commandKind": "global",
+      "name": "config-preview",
+      "summary": "Preview project configuration edits without writing",
+      "description": "Turns a request file of edits into a plan: the exact bytes each target file would receive, with diagnostics. Writes nothing; the plan is the only input config-apply accepts.",
+      "safeForSimultaneousRushProcesses": true,
+      "autoinstallerName": "rush-plugins",
+      "shellCommand": "config-rush preview"
+    },
+    {
+      "commandKind": "global",
+      "name": "config-apply",
+      "summary": "Apply a previously validated edit plan",
+      "description": "Applies a plan produced by config-preview as a whole (no subset selection) after re-checking that no input has changed since the preview. Each file is written atomically; a late failure stops later writes and leaves earlier ones in place, reported as a partial result (exit 4). Journals every write under common/temp; exit 3 when the preview is stale.",
+      "safeForSimultaneousRushProcesses": true,
+      "autoinstallerName": "rush-plugins",
+      "shellCommand": "config-rush apply"
+    },
+    {
+      "commandKind": "global",
+      "name": "config-status",
+      "summary": "Inspect an authoring journal without modifying files",
+      "description": "Reports the state of a journaled apply operation (applied, pending, unknown per target; lock owner; staged temporaries) for reconciliation after an interruption. Read-only; never deletes a lock or a file.",
+      "safeForSimultaneousRushProcesses": true,
+      "autoinstallerName": "rush-plugins",
+      "shellCommand": "config-rush status"
+    },
+    {
+      "commandKind": "global",
+      "name": "config-init",
+      "summary": "Plan creation of a project configuration document without writing",
+      "description": "Previews the creation of a project's local document for a domain from a document file; refuses to overwrite an existing document. Produces a plan for config-apply.",
+      "safeForSimultaneousRushProcesses": true,
+      "autoinstallerName": "rush-plugins",
+      "shellCommand": "config-rush init"
+    },
+    {
+      "commandKind": "global",
+      "name": "config-set",
+      "summary": "Plan a project configuration value assignment without writing",
+      "description": "Previews assigning a value at a JSON pointer in a project's local document. Produces a plan for config-apply; never edits inherited or rig sources.",
+      "safeForSimultaneousRushProcesses": true,
+      "autoinstallerName": "rush-plugins",
+      "shellCommand": "config-rush set"
+    },
+    {
+      "commandKind": "global",
+      "name": "config-unset",
+      "summary": "Plan removal of a project configuration value without writing",
+      "description": "Previews removing a locally authored field at a JSON pointer; inherited values can reappear. An absent local field is a no-op with a note.",
+      "safeForSimultaneousRushProcesses": true,
+      "autoinstallerName": "rush-plugins",
+      "shellCommand": "config-rush unset"
+    },
+    {
+      "commandKind": "global",
+      "name": "config-suppress",
+      "summary": "Plan suppression of an inherited project configuration value without writing",
+      "description": "Previews suppressing an inherited value at a JSON pointer so it does not apply to this project; suppression is explicit and reversible, not deletion of the shared source.",
+      "safeForSimultaneousRushProcesses": true,
+      "autoinstallerName": "rush-plugins",
+      "shellCommand": "config-rush suppress"
+    },
+    {
+      "commandKind": "global",
+      "name": "config-remove-suppression",
+      "summary": "Plan removal of a project configuration suppression without writing",
+      "description": "Previews removing a suppression so the inherited value applies again. No-op with a note when nothing is suppressed at the pointer.",
+      "safeForSimultaneousRushProcesses": true,
+      "autoinstallerName": "rush-plugins",
+      "shellCommand": "config-rush remove-suppression"
+    },
+    {
+      "commandKind": "global",
+      "name": "config-set-version",
+      "summary": "Plan a project configuration contract version change without writing",
+      "description": "Previews changing the declared schema version of a project's local document; the document is re-validated against the target version in the plan.",
+      "safeForSimultaneousRushProcesses": true,
+      "autoinstallerName": "rush-plugins",
+      "shellCommand": "config-rush set-version"
+    }
+  ],
+  "parameters": [
+    {
+      "parameterKind": "string",
+      "longName": "--root",
+      "description": "Explicit Rush repository root",
+      "associatedCommands": [
+        "config-discover",
+        "config-get",
+        "config-explain",
+        "config-validate",
+        "config-preview",
+        "config-apply",
+        "config-status",
+        "config-init",
+        "config-set",
+        "config-unset",
+        "config-suppress",
+        "config-remove-suppression",
+        "config-set-version"
+      ],
+      "argumentName": "VALUE"
+    },
+    {
+      "parameterKind": "stringList",
+      "longName": "--project",
+      "description": "Exact registered package name; repeat for validation",
+      "associatedCommands": [
+        "config-get",
+        "config-explain",
+        "config-validate",
+        "config-init",
+        "config-set",
+        "config-unset",
+        "config-suppress",
+        "config-remove-suppression",
+        "config-set-version"
+      ],
+      "argumentName": "VALUE"
+    },
+    {
+      "parameterKind": "stringList",
+      "longName": "--domain",
+      "description": "Registered configuration domain; repeat for validation",
+      "associatedCommands": [
+        "config-get",
+        "config-explain",
+        "config-validate",
+        "config-init",
+        "config-set",
+        "config-unset",
+        "config-suppress",
+        "config-remove-suppression",
+        "config-set-version"
+      ],
+      "argumentName": "VALUE"
+    },
+    {
+      "parameterKind": "flag",
+      "longName": "--optional",
+      "description": "Permit absence only if registration permits it",
+      "associatedCommands": ["config-get", "config-explain"]
+    },
+    {
+      "parameterKind": "string",
+      "longName": "--result-file",
+      "description": "Fresh invocation-bound JSON output path; never overwritten",
+      "associatedCommands": [
+        "config-discover",
+        "config-get",
+        "config-explain",
+        "config-validate",
+        "config-preview",
+        "config-apply",
+        "config-status",
+        "config-init",
+        "config-set",
+        "config-unset",
+        "config-suppress",
+        "config-remove-suppression",
+        "config-set-version"
+      ],
+      "argumentName": "VALUE"
+    },
+    {
+      "parameterKind": "string",
+      "longName": "--invocation-id",
+      "description": "Identity to verify before consuming machine output",
+      "associatedCommands": [
+        "config-discover",
+        "config-get",
+        "config-explain",
+        "config-validate",
+        "config-preview",
+        "config-apply",
+        "config-status",
+        "config-init",
+        "config-set",
+        "config-unset",
+        "config-suppress",
+        "config-remove-suppression",
+        "config-set-version"
+      ],
+      "argumentName": "VALUE"
+    },
+    {
+      "parameterKind": "flag",
+      "longName": "--json",
+      "description": "JSON on direct binary stdout; prefer result-file through Rush",
+      "associatedCommands": [
+        "config-discover",
+        "config-get",
+        "config-explain",
+        "config-validate",
+        "config-preview",
+        "config-apply",
+        "config-status",
+        "config-init",
+        "config-set",
+        "config-unset",
+        "config-suppress",
+        "config-remove-suppression",
+        "config-set-version"
+      ]
+    },
+    {
+      "parameterKind": "flag",
+      "longName": "--allow-empty",
+      "description": "Explicitly allow validation with no selected project/domain pairs.",
+      "associatedCommands": ["config-validate"]
+    },
+    {
+      "parameterKind": "string",
+      "longName": "--request-file",
+      "description": "Complete JSONC edit request file, or - for stdin",
+      "associatedCommands": ["config-preview"],
+      "argumentName": "VALUE"
+    },
+    {
+      "parameterKind": "string",
+      "longName": "--plan-file",
+      "description": "Saved edit plan or successful preview envelope",
+      "associatedCommands": ["config-apply"],
+      "argumentName": "VALUE"
+    },
+    {
+      "parameterKind": "string",
+      "longName": "--operation-id",
+      "description": "Exact operation UUID for read-only reconciliation",
+      "associatedCommands": ["config-status"],
+      "argumentName": "VALUE"
+    },
+    {
+      "parameterKind": "string",
+      "longName": "--document-file",
+      "description": "Complete domain document file, or - for stdin",
+      "associatedCommands": ["config-init"],
+      "argumentName": "VALUE"
+    },
+    {
+      "parameterKind": "string",
+      "longName": "--pointer",
+      "description": "RFC6901 pointer relative to domain values",
+      "associatedCommands": [
+        "config-set",
+        "config-unset",
+        "config-suppress",
+        "config-remove-suppression"
+      ],
+      "argumentName": "VALUE"
+    },
+    {
+      "parameterKind": "string",
+      "longName": "--value",
+      "description": "Explicit JSON value; no string/type guessing",
+      "associatedCommands": ["config-set"],
+      "argumentName": "VALUE"
+    },
+    {
+      "parameterKind": "string",
+      "longName": "--contract-version",
+      "description": "Explicit exact domain contract version",
+      "associatedCommands": ["config-set-version"],
+      "argumentName": "VALUE"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Resolve and publish @butshouldwe packages through the configured npm registry",
+      "type": "none",
+      "packageName": "@butshouldwe/fallow-rush"
+    }
+  ],
+  "packageName": "@butshouldwe/fallow-rush",
+  "email": "chief@butshouldwe.local"
+}

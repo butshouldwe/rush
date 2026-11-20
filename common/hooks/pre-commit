@@ -1,0 +1,22 @@
+#!/bin/sh
+set -eu
+# The installed wrapper invokes this file with `sh`. Node owns the NUL parsing
+# and argv construction so spaces and UTF-8 are never re-tokenized by a shell.
+CHECK_TOUCHED_ROOT=$(git rev-parse --show-toplevel) || exit 2
+export CHECK_TOUCHED_ROOT
+exec node --input-type=commonjs <<'NODE'
+const { spawnSync } = require('node:child_process');
+const path = require('node:path');
+const root = process.env.CHECK_TOUCHED_ROOT;
+function fail(message) { process.stderr.write(`pre-commit: ${message}\n`); process.exit(2); }
+const diff = spawnSync('git', ['diff', '--cached', '--name-only', '-z', '--diff-filter=ACM'], { cwd: root, encoding: 'buffer' });
+if (diff.error) fail(diff.error.message);
+if (diff.signal) fail(`git diff terminated by ${diff.signal}`);
+if (diff.status !== 0) fail(diff.stderr.toString().trim() || 'could not read staged paths');
+const staged = diff.stdout.toString('utf8').split('\0').filter((file) => /\.(?:ts|tsx|mts|cts)$/.test(file));
+if (staged.length === 0) process.exit(0);
+const checked = spawnSync(process.execPath, [path.join(root, 'common/scripts/agent-hooks/check-touched.mjs'), ...staged], { cwd: root, stdio: 'inherit' });
+if (checked.error) fail(checked.error.message);
+if (checked.signal) fail(`checker terminated by ${checked.signal}`);
+process.exit(checked.status ?? 2);
+NODE

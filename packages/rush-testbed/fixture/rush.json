@@ -1,0 +1,45 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush.schema.json",
+  "rushVersion": "5.177.2",
+  "pnpmVersion": "11.11.0",
+  "nodeSupportedVersionRange": ">=22.0.0 <27.0.0",
+  "projectFolderMinDepth": 2,
+  "projectFolderMaxDepth": 2,
+  "projects": [
+    {
+      "packageName": "build-tool",
+      "projectFolder": "projects/build-tool",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "docs-site",
+      "projectFolder": "projects/docs-site",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "lib-a",
+      "projectFolder": "projects/lib-a",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "lib-b",
+      "projectFolder": "projects/lib-b",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "lib-c",
+      "projectFolder": "projects/lib-c",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "lib-d",
+      "projectFolder": "projects/lib-d",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "web-app",
+      "projectFolder": "projects/web-app",
+      "shouldPublish": false
+    }
+  ]
+}

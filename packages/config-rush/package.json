@@ -1,0 +1,61 @@
+{
+  "name": "@butshouldwe/config-rush",
+  "version": "0.1.0",
+  "description": "Rig-aware project configuration discovery, validation and explanation for Rush.",
+  "homepage": "https://github.com/butshouldwe/rush/tree/main/packages/config-rush#readme",
+  "bugs": {
+    "url": "https://github.com/butshouldwe/rush/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/butshouldwe/rush.git",
+    "directory": "packages/config-rush"
+  },
+  "bin": {
+    "config-rush": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "rush-plugin-manifest.json",
+    "command-line.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "_phase:build": "tsc -p tsconfig.json",
+    "_phase:typecheck": "tsc -p tsconfig.json --noEmit",
+    "_phase:lint": "oxlint src tests",
+    "_phase:test": "vitest run",
+    "_phase:publish-check": "publint --pack npm --strict"
+  },
+  "dependencies": {
+    "@rushstack/rig-package": "0.7.3",
+    "ajv": "8.20.0",
+    "effect": "4.0.6",
+    "jsonc-parser": "3.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.1",
+    "oxlint": "1.77.0",
+    "publint": "0.3.22",
+    "typescript": "7.0.2",
+    "vitest": "4.1.10"
+  },
+  "engines": {
+    "node": ">=22.12.0 <27.0.0"
+  }
+}

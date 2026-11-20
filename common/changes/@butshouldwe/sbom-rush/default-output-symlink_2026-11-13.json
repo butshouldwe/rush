@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "comment": "Refuse symlink components of the implicit SBOM output directory before generation or publication; preserve explicitly selected output paths.",
+      "type": "patch",
+      "packageName": "@butshouldwe/sbom-rush"
+    }
+  ],
+  "packageName": "@butshouldwe/sbom-rush"
+}

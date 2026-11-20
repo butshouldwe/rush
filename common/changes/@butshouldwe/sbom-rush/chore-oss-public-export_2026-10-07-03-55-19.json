@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Prepare public npm metadata and configurable registry routing.",
+      "type": "patch",
+      "packageName": "@butshouldwe/sbom-rush"
+    }
+  ],
+  "packageName": "@butshouldwe/sbom-rush",
+  "email": "chief@butshouldwe.local"
+}

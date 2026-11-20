@@ -1,0 +1,6 @@
+{
+  "name": "@butshouldwe/rush",
+  "private": true,
+  "description": "Rush monorepo root for the @butshouldwe Rush plugin library (dogfoods Rush)",
+  "packageManager": "pnpm@12.6.0"
+}

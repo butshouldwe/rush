@@ -1,0 +1,34 @@
+# Internal agent instructions, adapters, host wiring, and tooling provenance.
+AGENTS.md
+CLAUDE.md
+.agents
+.claude
+.mcp.json
+skills-lock.json
+docs/agents
+
+# Internal handoffs, historical ledgers, and operational evidence stay canonical.
+HANDOFF.md
+progress.md
+progress
+receipts
+REASONING_RECEIPT.md
+
+# Forgejo-only CI config carries internal registry routing/auth configuration.
+.forgejo
+
+# Internal topology/distribution decisions; retain the public behavior ADR.
+docs/adr/0001-worktree-rush-is-the-family-wide-one-way.md
+docs/adr/0002-worktree-rush-distribution-is-the-registry.md
+common/hooks/README.md
+
+# Internal published-artifact dogfooding; its vendored tarball has host paths.
+# Exclude the registration together with the autoinstaller to avoid dangling deps.
+common/autoinstallers/rush-plugins
+common/config/rush/rush-plugins.json
+
+# Accidental generated Fallow report directory, not source or test goldens.
+somewhere
+
+# Host-specific experimental benchmark; production code/tests remain public.
+packages/worktree-rush/bench

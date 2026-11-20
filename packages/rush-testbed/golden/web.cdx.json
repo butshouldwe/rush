@@ -1,0 +1,175 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "metadata": {
+    "lifecycles": [
+      {
+        "phase": "pre-build"
+      }
+    ],
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "pnpm",
+          "version": "11.11.0"
+        },
+        {
+          "type": "application",
+          "name": "@butshouldwe/sbom-rush",
+          "version": "0.1.0"
+        }
+      ]
+    },
+    "component": {
+      "type": "library",
+      "name": "web-app",
+      "version": "1.0.0",
+      "purl": "pkg:npm/web-app@1.0.0",
+      "bom-ref": "pkg:npm/web-app@1.0.0"
+    },
+    "properties": [
+      {
+        "name": "sbom-rush:scenario",
+        "value": "web"
+      },
+      {
+        "name": "sbom-rush:main-project",
+        "value": "web-app"
+      },
+      {
+        "name": "sbom-rush:git-sha",
+        "value": "<sha>"
+      },
+      {
+        "name": "sbom-rush:ladder-rung",
+        "value": "2"
+      },
+      {
+        "name": "sbom-rush:generator",
+        "value": "pnpm-sbom-workspace-split-merge"
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "kleur",
+      "version": "4.1.5",
+      "purl": "pkg:npm/kleur@4.1.5",
+      "bom-ref": "pkg:npm/kleur@4.1.5",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/kleur/-/kleur-4.1.5.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "a3e34efbc5ab462404138ffb9f044984dd475a9566266e75d690475313cbb69d015084b3941a653916129937250a726f42adad2aefec825df156991ced95ae41"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "lib-a",
+      "version": "1.0.0",
+      "purl": "pkg:npm/lib-a@1.0.0",
+      "bom-ref": "pkg:npm/lib-a@1.0.0",
+      "properties": [
+        {
+          "name": "sbom-rush:workspace-project",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "lib-b",
+      "version": "1.0.0",
+      "purl": "pkg:npm/lib-b@1.0.0",
+      "bom-ref": "pkg:npm/lib-b@1.0.0",
+      "properties": [
+        {
+          "name": "sbom-rush:workspace-project",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "mri",
+      "version": "1.2.0",
+      "purl": "pkg:npm/mri@1.2.0",
+      "bom-ref": "pkg:npm/mri@1.2.0",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/mri/-/mri-1.2.0.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "b73cec91bddb1bc2ef606145fe60d3a6ade3a48e90f707372c49816a086ef83742b2c77515a90dec17348553661321aad5bab74607e409bddc9902e934f3aba0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "ms",
+      "version": "2.1.3",
+      "purl": "pkg:npm/ms@2.1.3",
+      "bom-ref": "pkg:npm/ms@2.1.3",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/ms/-/ms-2.1.3.tgz",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "e85973b9b4cb646dc9d9afcd542025784863ceae68c601f268253dc985ef70bb2fa1568726afece715c8ebf5d73fab73ed1f7100eb479d23bfb57b45dd645394"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "pkg:npm/kleur@4.1.5",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/lib-a@1.0.0",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/lib-b@1.0.0",
+      "dependsOn": [
+        "pkg:npm/lib-a@1.0.0"
+      ]
+    },
+    {
+      "ref": "pkg:npm/mri@1.2.0",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/ms@2.1.3",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/web-app@1.0.0",
+      "dependsOn": [
+        "pkg:npm/kleur@4.1.5",
+        "pkg:npm/lib-a@1.0.0",
+        "pkg:npm/lib-b@1.0.0",
+        "pkg:npm/mri@1.2.0",
+        "pkg:npm/ms@2.1.3"
+      ]
+    }
+  ]
+}

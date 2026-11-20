@@ -1,0 +1,23 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn",
+    "style": "off"
+  },
+  "rules": {
+    "typescript/no-non-null-assertion": "off"
+  },
+  "ignorePatterns": [
+    "**/dist",
+    "**/node_modules",
+    "common/scripts",
+    "common/autoinstallers",
+    "common/temp",
+    "packages/rush-testbed/fixture",
+    "packages/rush-testbed/golden",
+    "packages/sbom-rush/schemas",
+    "**/__fixtures__"
+  ]
+}

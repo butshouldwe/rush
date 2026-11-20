@@ -1,0 +1,9 @@
+{
+  "name": "rush-plugins",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "@butshouldwe/sbom-rush": "file:../../../../tmp/butshouldwe-sbom-rush-0.1.0.tgz",
+    "@butshouldwe/fallow-rush": "file:../../../../tmp/butshouldwe-fallow-rush-0.1.0.tgz"
+  }
+}

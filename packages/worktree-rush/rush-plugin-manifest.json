@@ -1,0 +1,10 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-plugin-manifest.schema.json",
+  "plugins": [
+    {
+      "pluginName": "worktree-rush-plugin",
+      "description": "Adds the `rush worktree-create` and `rush worktree-remove` custom commands: creates (or converges) a git worktree at the family convention path with dependency materialization and agent-state bootstrap (trust, permissions, MCP approvals), reporting per-stage timings — and removes it symmetrically, pruning the seeded state.",
+      "commandLineJsonFilePath": "command-line.json"
+    }
+  ]
+}

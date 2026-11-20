@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@butshouldwe/config-rush",
+      "comment": "Report interruptions precisely: `config-status` names a verified staged temporary and a crash-left or unreadable lock, keeps journal cleanup evidence, and never deletes anything. Result envelopes are only written to a validated destination.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@butshouldwe/config-rush"
+}

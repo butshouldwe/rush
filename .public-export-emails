@@ -1,0 +1,2 @@
+{"local": "hermes", "domain": "butshouldwe.com", "prefix": "common/changes/@butshouldwe/", "suffix": ".json", "exclude": "!"}
+{"local": "chief", "domain": "butshouldwe.local", "prefix": "common/changes/@butshouldwe/", "suffix": ".json", "exclude": "!"}

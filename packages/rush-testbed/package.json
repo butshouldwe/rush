@@ -1,0 +1,25 @@
+{
+  "name": "@butshouldwe/rush-testbed",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Synthetic Rush monorepo fixture + spawn-based integration harness for @butshouldwe/sbom-rush and @butshouldwe/fallow-rush. Never published; invokes the plugins, never imports them.",
+  "type": "module",
+  "scripts": {
+    "_phase:typecheck": "tsc --noEmit",
+    "_phase:lint": "oxlint .",
+    "_phase:test": "vitest run"
+  },
+  "devDependencies": {
+    "@butshouldwe/fallow-rush": "workspace:*",
+    "@butshouldwe/sbom-rush": "workspace:*",
+    "@microsoft/rush": "5.177.2",
+    "@rushstack/mcp-server": "0.4.21",
+    "@types/node": "22.20.1",
+    "fallow": "3.6.0",
+    "knip": "6.27.0",
+    "oxlint": "1.74.0",
+    "typescript": "7.0.2",
+    "vitest": "4.1.10"
+  },
+  "comment-devDependencies": "The two plugin entries exist for pnpm -r ORDERING only: the harness packs their tarballs, so their builds must finish before this package's tests start (pnpm runs unrelated workspace packages concurrently). The zero-import contract stands: harness code never imports them."
+}

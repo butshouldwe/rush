@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add packaged read-only project configuration discovery, validation and provenance with shared Effect and Promise APIs.",
+      "type": "minor",
+      "packageName": "@butshouldwe/config-rush"
+    }
+  ],
+  "packageName": "@butshouldwe/config-rush",
+  "email": "hermes@butshouldwe.com"
+}

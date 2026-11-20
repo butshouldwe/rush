@@ -1,0 +1,71 @@
+{
+  "name": "@butshouldwe/fallow-rush",
+  "version": "0.1.0",
+  "description": "Rush plugin: Fallow codebase intelligence across a Rush monorepo with per-project attribution. Adds the `rush fallow` custom command.",
+  "keywords": [
+    "dead-code",
+    "fallow",
+    "monorepo",
+    "rush",
+    "rush-plugin",
+    "static-analysis"
+  ],
+  "homepage": "https://github.com/butshouldwe/rush/tree/main/packages/fallow-rush#readme",
+  "bugs": {
+    "url": "https://github.com/butshouldwe/rush/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/butshouldwe/rush.git",
+    "directory": "packages/fallow-rush"
+  },
+  "bin": {
+    "fallow-rush": "./dist/cli.mjs"
+  },
+  "files": [
+    "dist",
+    "rush-plugin-manifest.json",
+    "command-line.json",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md",
+    "HERMES-WIRING.md"
+  ],
+  "type": "module",
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "_phase:build": "tsdown",
+    "_phase:typecheck": "tsc --noEmit",
+    "_phase:lint": "oxlint .",
+    "_phase:test": "vitest run",
+    "_phase:publish-check": "publint --pack npm --strict && attw --pack . --profile esm-only"
+  },
+  "dependencies": {
+    "fallow": "3.6.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "0.18.5",
+    "@types/node": "22.20.1",
+    "marked": "9.1.6",
+    "oxlint": "1.74.0",
+    "publint": "0.3.22",
+    "tsdown": "0.22.9",
+    "typescript": "7.0.2",
+    "vitest": "4.1.10"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

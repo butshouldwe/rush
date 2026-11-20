@@ -1,0 +1,83 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "metadata": {
+    "lifecycles": [
+      {
+        "phase": "pre-build"
+      }
+    ],
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "pnpm",
+          "version": "11.11.0"
+        },
+        {
+          "type": "application",
+          "name": "@butshouldwe/sbom-rush",
+          "version": "0.1.0"
+        }
+      ]
+    },
+    "component": {
+      "type": "library",
+      "name": "docs-site",
+      "version": "1.0.0",
+      "purl": "pkg:npm/docs-site@1.0.0",
+      "bom-ref": "pkg:npm/docs-site@1.0.0"
+    },
+    "properties": [
+      {
+        "name": "sbom-rush:scenario",
+        "value": "docs"
+      },
+      {
+        "name": "sbom-rush:main-project",
+        "value": "docs-site"
+      },
+      {
+        "name": "sbom-rush:git-sha",
+        "value": "<sha>"
+      },
+      {
+        "name": "sbom-rush:ladder-rung",
+        "value": "2"
+      },
+      {
+        "name": "sbom-rush:generator",
+        "value": "pnpm-sbom-workspace-split-merge"
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "lib-a",
+      "version": "1.0.0",
+      "purl": "pkg:npm/lib-a@1.0.0",
+      "bom-ref": "pkg:npm/lib-a@1.0.0",
+      "properties": [
+        {
+          "name": "sbom-rush:workspace-project",
+          "value": "true"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "pkg:npm/docs-site@1.0.0",
+      "dependsOn": [
+        "pkg:npm/lib-a@1.0.0"
+      ]
+    },
+    {
+      "ref": "pkg:npm/lib-a@1.0.0",
+      "dependsOn": []
+    }
+  ]
+}
