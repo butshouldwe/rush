@@ -1,6 +1,6 @@
 {
   "name": "@butshouldwe/config-rush",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Rig-aware project configuration discovery, validation and explanation for Rush.",
   "homepage": "https://github.com/butshouldwe/rush/tree/main/packages/config-rush#readme",
   "bugs": {

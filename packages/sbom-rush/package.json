@@ -1,6 +1,6 @@
 {
   "name": "@butshouldwe/sbom-rush",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Rush plugin: one CycloneDX SBOM per deployed artifact from rush deploy output. Adds the `rush sbom` custom command.",
   "keywords": [
     "cyclonedx",

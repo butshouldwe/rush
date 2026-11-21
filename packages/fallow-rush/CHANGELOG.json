@@ -1,0 +1,43 @@
+{
+  "name": "@butshouldwe/fallow-rush",
+  "entries": [
+    {
+      "version": "0.1.1",
+      "tag": "@butshouldwe/fallow-rush_v0.1.1",
+      "date": "Sat, 21 Nov 2026 00:13:23 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Normalize package manifest key order required by the pinned formatter."
+          },
+          {
+            "comment": "Resolve and publish @butshouldwe packages through the configured npm registry"
+          },
+          {
+            "comment": "Correct the LICENSE holder name to Steve Dalonzo (no apostrophe)."
+          },
+          {
+            "comment": "OSS readiness: root LICENSE + CONTRIBUTING; README verify/layout fixes; add bugs metadata; publish checks (publint + attw) wired into CI."
+          },
+          {
+            "comment": "Clarify the public registry guidance and keep the wiring instructions focused on setup."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Prepare public npm metadata and configurable registry routing."
+          },
+          {
+            "comment": "Refuse symlink components in the default fallow report directory before scanning or writing, and use the validated normalized path for every write; preserve explicitly selected output paths."
+          },
+          {
+            "comment": "Render repository text literally in Markdown reports. Preserve exact code text when table syntax permits it."
+          },
+          {
+            "comment": "Harden report integrity with safe writes, ownership and containment guards, serialized output, safe rendering, collision checks, and complete Fallow findings gating."
+          }
+        ]
+      }
+    }
+  ]
+}

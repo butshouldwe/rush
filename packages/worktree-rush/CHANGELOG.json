@@ -1,0 +1,51 @@
+{
+  "name": "@butshouldwe/worktree-rush",
+  "entries": [
+    {
+      "version": "0.2.0",
+      "tag": "@butshouldwe/worktree-rush_v0.2.0",
+      "date": "Sat, 21 Nov 2026 00:13:23 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Safely recognize squash-merged branches during proof-bearing worktree removal."
+          },
+          {
+            "comment": "Add creation-only --start-point support with local commit validation."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Normalize package manifest key order required by the pinned formatter."
+          },
+          {
+            "comment": "Resolve and publish @butshouldwe packages through the configured npm registry"
+          },
+          {
+            "comment": "Correct the LICENSE holder name to Steve Dalonzo (no apostrophe)."
+          },
+          {
+            "comment": "OSS readiness: root LICENSE + CONTRIBUTING; README verify/layout fixes; add bugs metadata; publish checks (publint + attw) wired into CI."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Prepare public npm metadata and configurable registry routing."
+          },
+          {
+            "comment": "Require npm package names for filtered installs and double embedded quotes in the Windows shell fallback."
+          },
+          {
+            "comment": "Authenticate linked-worktree registrations and contain Claude settings copies against symlink redirection."
+          },
+          {
+            "comment": "Bind removal to the worktree's actual HEAD and delete branches atomically with an expected-old OID."
+          },
+          {
+            "comment": "Canonicalize removal paths, enforce owned Claude-state locking, and fail touched-file validation safely."
+          }
+        ]
+      }
+    }
+  ]
+}

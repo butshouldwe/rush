@@ -1,6 +1,6 @@
 {
   "name": "@butshouldwe/worktree-rush",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Rush plugin for fast, fully inherited git worktrees with creation, bootstrap, and proof-bearing cleanup commands.",
   "keywords": [
     "agents",

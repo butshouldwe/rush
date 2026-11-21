@@ -1,1 +1,0 @@
-{"changes":[{"comment":"Authenticate linked-worktree registrations and contain Claude settings copies against symlink redirection.","type":"patch","packageName":"@butshouldwe/worktree-rush"}],"packageName":"@butshouldwe/worktree-rush","email":"hermes@butshouldwe.com"}

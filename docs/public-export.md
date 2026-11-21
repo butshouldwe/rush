@@ -33,9 +33,12 @@ three SHA-256 hashes. `sha256sum --strict -c .public-export-source` verifies
 the copied bytes. Change the canonical source and synchronize these copies;
 do not edit them independently.
 
-Repository-owned policy lives in `.public-export-emails` and
-`.public-export-reviewed-text`. The first permits two exact automation
-addresses within Rush changefile JSON paths. The second permits the API key
+Repository-owned policy lives in `.public-export-reviewed-text`, and in
+`.public-export-emails` when a pending change file carries an automation
+address. The email file permits exact addresses within Rush changefile JSON
+paths. `rush version --bump` consumes every change file, so a release leaves
+its entries unused: delete the file in the release PR, and add it back with the
+first change file that needs it. The reviewed-text file permits the API key
 content rule for one reviewed schema at its exact path and raw-byte SHA-256.
 It does not exempt other rules, paths, changed bytes or gitleaks. Both files
 reject malformed, duplicate and unused entries. Reserved example email

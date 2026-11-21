@@ -1,1 +1,0 @@
-{"changes":[{"comment":"Bind removal to the worktree's actual HEAD and delete branches atomically with an expected-old OID.","type":"patch","packageName":"@butshouldwe/worktree-rush"}],"packageName":"@butshouldwe/worktree-rush","email":"hermes@butshouldwe.com"}

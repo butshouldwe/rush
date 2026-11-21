@@ -19,7 +19,7 @@
         {
           "type": "application",
           "name": "@butshouldwe/sbom-rush",
-          "version": "0.1.0"
+          "version": "0.1.1"
         }
       ]
     },
