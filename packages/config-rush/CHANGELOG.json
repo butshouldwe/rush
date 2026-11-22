@@ -2,6 +2,18 @@
   "name": "@butshouldwe/config-rush",
   "entries": [
     {
+      "version": "0.2.1",
+      "tag": "@butshouldwe/config-rush_v0.2.1",
+      "date": "Sun, 22 Nov 2026 18:27:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Publish from GitHub Actions through npm trusted publishing, with provenance. No code changes."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.0",
       "tag": "@butshouldwe/config-rush_v0.2.0",
       "date": "Sat, 21 Nov 2026 00:13:23 GMT",

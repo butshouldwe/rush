@@ -1,6 +1,6 @@
 {
   "name": "@butshouldwe/fallow-rush",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Rush plugin: Fallow codebase intelligence across a Rush monorepo with per-project attribution. Adds the `rush fallow` custom command.",
   "keywords": [
     "dead-code",

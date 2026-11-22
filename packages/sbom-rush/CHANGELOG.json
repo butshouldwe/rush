@@ -2,6 +2,18 @@
   "name": "@butshouldwe/sbom-rush",
   "entries": [
     {
+      "version": "0.1.2",
+      "tag": "@butshouldwe/sbom-rush_v0.1.2",
+      "date": "Sun, 22 Nov 2026 18:27:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Publish from GitHub Actions through npm trusted publishing, with provenance. No code changes."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.1",
       "tag": "@butshouldwe/sbom-rush_v0.1.1",
       "date": "Sat, 21 Nov 2026 00:13:23 GMT",
