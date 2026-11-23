@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
+import { setTimeout as sleep } from 'node:timers/promises';
 
 const [mode, output, ...args] = process.argv.slice(2);
 const registryIndex = args.indexOf('--registry');
@@ -15,11 +16,31 @@ const sri = (bytes) => 'sha512-' + hash(bytes, 'sha512', 'base64');
 function fail(message) {
   throw new Error(message);
 }
+// A registry answer that may still change: npm's metadata and tarball CDN
+// lag a fresh publish (rush#50). Before publishing it fails closed like any
+// error; after publishing it is retried until the bounded wait runs out.
+class Pending extends Error {}
+function pending(message) {
+  throw new Pending(message);
+}
+// Post-publish wait. Overridable for tests only; the workflow sets neither.
+function timing(name, fallback) {
+  const text = process.env[name];
+  if (text === undefined || text === '') return fallback;
+  const n = Number(text);
+  if (!Number.isInteger(n) || n < 0 || n > 600000) fail(`${name} must be 0..600000 ms`);
+  return n;
+}
 function json(text) {
   return JSON.parse(text);
 }
-function npm(params, cwd) {
-  return execFileSync('npm', params, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+function npm(params, cwd, timeout) {
+  return execFileSync('npm', params, {
+    cwd,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+    timeout,
+  });
 }
 function one(value) {
   if (Array.isArray(value)) {
@@ -43,11 +64,12 @@ function validate(p, repository) {
     }
   }
 }
-function view(spec) {
+// null: the registry says the version is absent. Throws Pending when the
+// state is unknown (network error, unparseable or malformed answer).
+function view(spec, timeout) {
+  let dist;
   try {
-    const dist = one(json(npm(['view', spec, 'dist', '--json', '--registry', registry])));
-    if (!dist || typeof dist !== 'object' || Array.isArray(dist)) fail('invalid registry dist');
-    return dist;
+    dist = one(json(npm(['view', spec, 'dist', '--json', '--registry', registry], undefined, timeout)));
   } catch (e) {
     let code;
     try {
@@ -56,29 +78,87 @@ function view(spec) {
       /* unknown stays unknown */
     }
     if (code === 'E404') return null;
-    fail(`registry state unknown for ${spec}`);
+    pending(`registry state unknown for ${spec}`);
   }
+  // Some npm versions print the E404 payload and still exit 0.
+  if (dist && typeof dist === 'object' && !Array.isArray(dist) && 'error' in dist) {
+    if (dist.error?.code === 'E404') return null;
+    pending(`registry state unknown for ${spec}`);
+  }
+  if (!dist || typeof dist !== 'object' || Array.isArray(dist))
+    pending(`registry state unknown for ${spec}`);
+  return dist;
 }
-async function verify(entry, dist, provenance) {
+async function verify(entry, dist, provenance, timeout = 30000) {
   const spec = `${entry.name}@${entry.version}`;
-  if (dist?.integrity !== entry.integrity) fail(`${spec} registry integrity mismatch`);
-  const url = new URL(dist.tarball);
+  if (dist === null) pending(`${spec} not on the registry yet`);
+  // Final answers first. A version's bytes never change once published, so a
+  // parseable tarball URL off the publish registry is final, even in an
+  // answer still missing its integrity (rush#51 Lyra 7239 F1). So are another
+  // integrity and missing provenance.
+  let url;
+  try {
+    url = new URL(dist.tarball);
+  } catch {
+    /* absent or unparseable: incomplete, checked below */
+  }
   const base = new URL(registry);
   if (
-    url.origin !== base.origin ||
+    url &&
+    (url.origin !== base.origin ||
     !url.pathname.startsWith(base.pathname) ||
     url.username ||
-    url.password
+    url.password)
   ) {
     fail(`${spec} tarball URL is not on the publish registry`);
   }
+  // Metadata without a well-formed integrity or tarball is incomplete, not
+  // wrong: it may still fill in (rush#51 Lyra 7235 F1, F2).
+  if (typeof dist.integrity !== 'string' || !dist.integrity)
+    pending(`registry state unknown for ${spec} (no integrity)`);
+  if (dist.integrity !== entry.integrity) fail(`${spec} registry integrity mismatch`);
+  if (!url) pending(`registry state unknown for ${spec} (no tarball URL)`);
   if (provenance && !dist.attestations?.provenance?.predicateType)
     fail(`${spec} provenance missing`);
-  const response = await fetch(url, { redirect: 'error', signal: AbortSignal.timeout(30000) });
-  if (!response.ok || sri(Buffer.from(await response.arrayBuffer())) !== entry.integrity) {
-    fail(`${spec} downloadable tarball integrity mismatch`);
+  let response, bytes;
+  try {
+    response = await fetch(url, { redirect: 'error', signal: AbortSignal.timeout(timeout) });
+    if (response.ok) bytes = Buffer.from(await response.arrayBuffer());
+  } catch {
+    pending(`${spec} tarball download failed`);
   }
+  if (!response.ok) pending(`${spec} tarball not downloadable yet (HTTP ${response.status})`);
+  if (sri(bytes) !== entry.integrity) fail(`${spec} downloadable tarball integrity mismatch`);
   console.log(`verified ${spec}`);
+}
+// After a publish: retry Pending answers with backoff until verified or the
+// wait runs out. Any other failure stops at once. A rerun is safe either
+// way: a version that becomes visible with the same bytes is skipped.
+async function settle(entry, { timeout, interval }) {
+  const spec = `${entry.name}@${entry.version}`;
+  const deadline = Date.now() + timeout;
+  let wait = interval;
+  for (;;) {
+    let reason;
+    // Each read gets the time left, at least 1 s, so a hung `npm view` or a
+    // slow download cannot hold the job past the bound (Lyra F3, F4).
+    const left = () => Math.max(1000, deadline - Date.now());
+    try {
+      return await verify(entry, view(spec, left()), true, Math.min(30000, left()));
+    } catch (e) {
+      if (!(e instanceof Pending)) throw e;
+      reason = e.message;
+    }
+    if (Date.now() + wait > deadline) {
+      fail(
+        `${spec} published but not verified within ${timeout / 1000}s (${reason}); ` +
+          'rerun the failed job once npm shows it: same bytes are skipped',
+      );
+    }
+    console.log(`${reason}; retrying in ${wait / 1000}s`);
+    await sleep(wait);
+    wait = Math.min(wait * 2, 30000);
+  }
 }
 
 try {
@@ -142,6 +222,10 @@ try {
     const v = npm(['--version']).trim().split('.').map(Number);
     if (!(v[0] > 11 || (v[0] === 11 && (v[1] > 5 || (v[1] === 5 && v[2] >= 1)))))
       fail('npm >=11.5.1 required');
+    const wait = {
+      timeout: timing('RELEASE_VERIFY_TIMEOUT_MS', 300000),
+      interval: timing('RELEASE_VERIFY_INTERVAL_MS', 5000),
+    };
     let published = 0,
       skipped = 0;
     for (const e of entries) {
@@ -181,7 +265,7 @@ try {
         '--provenance',
       ]);
       published++;
-      await verify(e, view(spec), true);
+      await settle(e, wait);
     }
     const summary = `published=${published} skipped=${skipped} dry_run=${dry}\n`;
     console.log(summary);

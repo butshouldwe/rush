@@ -22,11 +22,11 @@ MUTANTS = [
     ('sha256', "if (hash(bytes, 'sha256', 'hex') !== e.sha256)", 'if (false)', 'publish refuses every package'),
     ('tarball-name', 'if (p.name !== e.name || p.version !== e.version)', 'if (false)', 'publish refuses a tarball whose package.json'),
     ('token', 'if (value && /^(NODE_AUTH_TOKEN|NPM_TOKEN|NPM_AUTH_TOKEN)$|authToken/i.test(key))', 'if (false)', 'publish refuses a long-lived token'),
-    ('registry-error', 'fail(`registry state unknown for ${spec}`);', 'return null;', 'publish stops when the registry state is unknown'),
+    ('registry-error', 'pending(`registry state unknown for ${spec}`);\n  }\n  // Some npm', 'return null;\n  }\n  // Some npm', 'publish stops when the registry state is unknown'),
     ('registry-shape', "if (!dist || typeof dist !== 'object' || Array.isArray(dist))", 'if (false)', 'publish refuses malformed successful'),
-    ('downloaded-integrity', "sri(Buffer.from(await response.arrayBuffer())) !== entry.integrity", 'false', 'publish stops before later packages when matching metadata'),
+    ('downloaded-integrity', "if (sri(bytes) !== entry.integrity)", 'if (false)', 'publish stops before later packages when matching metadata'),
     ('provenance-metadata', 'if (provenance && !dist.attestations?.provenance?.predicateType)', 'if (false)', 'publish fails when the registry holds the version without provenance'),
-    ('registry-integrity', 'if (dist?.integrity !== entry.integrity)', 'if (false)', 'publish fails when the registry serves bytes'),
+    ('registry-integrity', 'if (dist.integrity !== entry.integrity)', 'if (false)', 'publish fails when the registry serves bytes'),
     ('publish-provenance', "'--provenance',", "'--ignore-scripts',", 'publish sends each absent package'),
 ]
 WORKFLOW_MUTANTS = [
@@ -51,10 +51,10 @@ def main():
         for key in ['NODE_AUTH_TOKEN', 'NPM_TOKEN', 'NPM_AUTH_TOKEN']:
             env.pop(key, None)
         baseline = subprocess.run(['node', '--test', 'scripts/release-npm.test.mjs'], cwd=root, env=env, capture_output=True, text=True)
-        if baseline.returncode != 0 or 'pass 33' not in baseline.stdout:
+        if baseline.returncode != 0 or 'pass 55' not in baseline.stdout:
             print(baseline.stdout, baseline.stderr)
             raise RuntimeError('baseline failed or empty; mutation results inconclusive')
-        print('baseline: 33 tests pass')
+        print('baseline: 55 tests pass')
         for file, mutations in [('scripts/release-npm.mjs', MUTANTS), ('.github/workflows/publish.yml', WORKFLOW_MUTANTS), ('scripts/release-npm.test.mjs', TEST_MUTANTS)]:
             path = root / file
             original = path.read_text()

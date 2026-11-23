@@ -50,6 +50,9 @@ function run(args, { env = {}, cwd = root } = {}) {
           NPM_CONFIG_GLOBALCONFIG: join(fixtureHome, 'global.npmrc'),
           GITHUB_STEP_SUMMARY: '',
           GITHUB_ACTIONS: '',
+          // Bound every post-publish wait; tests that need other timing set it.
+          RELEASE_VERIFY_TIMEOUT_MS: '2000',
+          RELEASE_VERIFY_INTERVAL_MS: '10',
           ...env,
         },
       },
@@ -92,9 +95,11 @@ async function packTwo() {
 }
 
 // A stub npm. State maps "<name>@<version>" to a view answer:
-// { present: {integrity, tarball, attestations} } | "E404" | "EBROKEN".
+// { present: {integrity, tarball, attestations} } | "E404" | "E404_EXIT0" | "EBROKEN".
 // On publish it marks the spec present, using `onPublish` to decide what the
 // registry then reports (honest bytes and provenance unless told otherwise).
+// `onPublish[spec].lagReads: n` makes the next n views still answer
+// `lagAs` (default "E404"), the way npm's metadata lags a fresh publish.
 function stubNpm(base, { version = '11.6.0', state = {}, onPublish = {} } = {}) {
   const bin = join(base, 'bin');
   mkdirSync(bin, { recursive: true });
@@ -111,7 +116,23 @@ fs.appendFileSync(${JSON.stringify(logPath)}, JSON.stringify({ args, cwd: proces
 const db = JSON.parse(fs.readFileSync(${JSON.stringify(statePath)}, 'utf8'));
 if (args[0] === '--version') { console.log(${JSON.stringify(version)}); process.exit(0); }
 if (args[0] === 'view') {
-  const answer = db.state[args[1]];
+  let answer = db.state[args[1]];
+  const lag = (db.lag || {})[args[1]];
+  if (lag && lag.n > 0) {
+    lag.n--;
+    fs.writeFileSync(${JSON.stringify(statePath)}, JSON.stringify(db));
+    answer = lag.as;
+  }
+  const hang = (db.hang || {})[args[1]];
+  if (hang && hang.n > 0) {
+    hang.n--;
+    fs.writeFileSync(${JSON.stringify(statePath)}, JSON.stringify(db));
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, hang.ms);
+  }
+  if (answer === 'E404_EXIT0') {
+    console.log(JSON.stringify({ error: { code: 'E404', summary: 'Not Found' } }));
+    process.exit(0);
+  }
   if (answer === undefined || answer === 'E404') {
     console.error('npm error code E404');
     console.log(JSON.stringify({ error: { code: 'E404', summary: 'Not Found' } }));
@@ -130,6 +151,14 @@ if (args[0] === 'publish') {
   const spec = Object.keys(db.state).find((k) => k.endsWith('@' + m[2]) && db.state[k] === 'E404' && k.replace(/[@/]/g, (c) => c === '@' ? '' : '-').startsWith(m[1]));
   const how = db.onPublish[spec] || {};
   if (how.fail) { console.error('npm error code E403'); process.exit(1); }
+  if (how.lagReads) {
+    db.lag = db.lag || {};
+    db.lag[spec] = { n: how.lagReads, as: how.lagAs || 'E404' };
+  }
+  if (how.hangReads) {
+    db.hang = db.hang || {};
+    db.hang[spec] = { n: how.hangReads, ms: how.hangMs };
+  }
   db.state[spec] = { present: {
     integrity: how.integrity || 'sha512-' + crypto.createHash('sha512').update(bytes).digest('base64'),
     tarball: (how.tarballBase || db.onPublish.tarballBase) + tgz,
@@ -153,8 +182,17 @@ process.exit(9);
 }
 
 // Serves files from `dir` the way the registry serves tarballs.
-async function tarballServer(dir, corruptFile) {
-  const server = createServer((req, res) => {
+async function tarballServer(dir, corruptFile, { missFirst = 0, delayMs = 0 } = {}) {
+  const misses = {};
+  const server = createServer(async (req, res) => {
+    if (delayMs) await new Promise((r) => setTimeout(r, delayMs));
+    const name = basename(req.url);
+    misses[name] = (misses[name] ?? 0) + 1;
+    if (misses[name] <= missFirst) {
+      res.writeHead(404);
+      res.end();
+      return;
+    }
     try {
       const body = readFileSync(join(dir, basename(req.url)));
       res.writeHead(200);
@@ -170,6 +208,7 @@ async function tarballServer(dir, corruptFile) {
 }
 
 const publishCalls = (calls) => calls().filter((a) => a[0] === 'publish');
+const viewCalls = (calls, spec) => calls().filter((a) => a[0] === 'view' && a[1] === spec);
 
 // ---------------------------------------------------------------- pack
 
@@ -501,6 +540,225 @@ test('publish fails when the tarball URL is not on the publish registry', async 
   assert.match(r.stderr, /tarball URL/);
 });
 
+// ------------------------------------------- post-publish propagation
+//
+// rush#50: on run 45109763473 npm's metadata lagged each fresh publish, the
+// immediate readback failed, and every attempt published one package and
+// stopped. These pin the bounded wait and what still fails at once.
+// Classes (ADR-067 amendment 1): the wait tests and the timing checks are R2,
+// the release contract. "fails at once" and "stops with a not-visible error"
+// are R1: a final bad answer must not be retried into a pass, and a wait that
+// runs out must not exit 0. The R1 mutant is in
+// receipts/evidence/publish-verify-retry/controls.sh.
+
+const ALPHA = '@butshouldwe/alpha@1.2.3';
+
+async function lagged(onPublishAlpha, { serverOpts, env = {} } = {}) {
+  const { base, out, manifest } = await packTwo();
+  const srv = await tarballServer(out, undefined, serverOpts);
+  if (typeof onPublishAlpha === 'function') onPublishAlpha = onPublishAlpha(manifest, srv.registry);
+  try {
+    const npm = stubNpm(base, {
+      state: { [ALPHA]: 'E404', '@butshouldwe/beta@1.2.3': 'E404' },
+      onPublish: { tarballBase: srv.registry, [ALPHA]: onPublishAlpha },
+    });
+    const started = Date.now();
+    const r = await run(['publish', out, '--registry', srv.registry], {
+      env: { ...npm.env, RELEASE_MANIFEST: JSON.stringify(manifest), ...env },
+    });
+    return { r, npm, manifest, ms: Date.now() - started };
+  } finally {
+    await srv.close();
+  }
+}
+
+for (const lagAs of ['E404', 'E404_EXIT0', 'EBROKEN']) {
+  test(`publish waits while a fresh version still reads ${lagAs}, then verifies and continues`, async () => {
+    const { r, npm } = await lagged({ lagReads: 3, lagAs });
+    assert.equal(r.code, 0, r.stderr + r.stdout);
+    // one pre-publish read, three lagged reads, one good read
+    assert.equal(viewCalls(npm.calls, ALPHA).length, 5);
+    assert.equal(publishCalls(npm.calls).length, 2);
+    assert.match(r.stdout, /verified @butshouldwe\/alpha@1\.2\.3/);
+    assert.match(r.stdout, /verified @butshouldwe\/beta@1\.2\.3/);
+    assert.match(r.stdout, /published=2 skipped=0/);
+  });
+}
+
+for (const [label, partial] of [
+  ['no integrity', () => ({})],
+  ['no tarball', (m) => ({ integrity: m[0].integrity })],
+  ['an unparseable tarball', (m) => ({ integrity: m[0].integrity, tarball: 'not a url' })],
+]) {
+  // R2 (Lyra F1, F2): a half-written fresh answer is lag, not a mismatch.
+  test(`publish waits while fresh metadata has ${label}, then verifies`, async () => {
+    const { r, npm } = await lagged((m) => ({ lagReads: 2, lagAs: { present: partial(m) } }));
+    assert.equal(r.code, 0, r.stderr + r.stdout);
+    assert.equal(viewCalls(npm.calls, ALPHA).length, 4);
+    assert.match(r.stdout, /published=2 skipped=0/);
+  });
+}
+
+// R1 (Lyra 7239 F1): a tarball URL off the publish registry is final even
+// when the same answer still lacks its integrity. It must fail on the first
+// read after the publish, and beta must not be published.
+for (const [label, url] of [
+  ['a foreign tarball URL', () => 'https://example.invalid/alpha-1.2.3.tgz'],
+  ['a credential tarball URL', (reg) => reg.replace('://', '://user:pass@') + 'alpha-1.2.3.tgz'],
+]) {
+  test(`publish fails at once on ${label} in a fresh answer without integrity`, async () => {
+    const prov = { url: 'x', provenance: { predicateType: 'https://slsa.dev/provenance/v1' } };
+    const { r, npm } = await lagged((m, reg) => ({
+      lagReads: 1,
+      lagAs: { present: { tarball: url(reg), attestations: prov } },
+    }));
+    assert.notEqual(r.code, 0);
+    assert.match(r.stderr, /tarball URL is not on the publish registry/);
+    assert.equal(viewCalls(npm.calls, ALPHA).length, 2);
+    assert.equal(publishCalls(npm.calls).length, 1);
+  });
+}
+
+// R2 (Lyra F3, F4): a hung read or a slow download cannot hold the job past
+// the bound. Each read gets the time left, at least 1 s.
+test('publish stops near the bound when a fresh npm view hangs', async () => {
+  const { r, ms } = await lagged(
+    { hangReads: 1, hangMs: 20000 },
+    { env: { RELEASE_VERIFY_TIMEOUT_MS: '300', RELEASE_VERIFY_INTERVAL_MS: '10' } },
+  );
+  assert.notEqual(r.code, 0);
+  assert.match(r.stderr, /published but not verified within 0\.3s/);
+  assert.ok(ms < 10000, `took ${ms} ms`);
+});
+
+test('publish stops near the bound when a fresh tarball download stalls', async () => {
+  const { r, ms } = await lagged(
+    {},
+    {
+      serverOpts: { delayMs: 20000 },
+      env: { RELEASE_VERIFY_TIMEOUT_MS: '300', RELEASE_VERIFY_INTERVAL_MS: '10' },
+    },
+  );
+  assert.notEqual(r.code, 0);
+  assert.match(r.stderr, /published but not verified within 0\.3s/);
+  assert.ok(ms < 10000, `took ${ms} ms`);
+});
+
+test('publish waits while the fresh tarball is not downloadable yet', async () => {
+  const { r } = await lagged({}, { serverOpts: { missFirst: 2 } });
+  assert.equal(r.code, 0, r.stderr + r.stdout);
+  assert.match(r.stdout, /published=2 skipped=0/);
+});
+
+test('publish stops with a not-visible error, not a mismatch, when the wait runs out', async () => {
+  const { r, npm } = await lagged(
+    { lagReads: 100000 },
+    { env: { RELEASE_VERIFY_TIMEOUT_MS: '300', RELEASE_VERIFY_INTERVAL_MS: '10' } },
+  );
+  assert.notEqual(r.code, 0);
+  assert.match(r.stderr, /@butshouldwe\/alpha@1\.2\.3 published but not verified within 0\.3s/);
+  assert.match(r.stderr, /rerun/);
+  assert.doesNotMatch(r.stderr, /integrity mismatch/);
+  assert.equal(publishCalls(npm.calls).length, 1);
+});
+
+for (const [label, how, reason] of [
+  ['other bytes', 'integrity', /registry integrity mismatch/],
+  ['no provenance', { noProvenance: true }, /provenance missing/],
+  ['a foreign tarball URL', { tarballBase: 'https://example.invalid/' }, /tarball URL/],
+]) {
+  test(`publish fails at once, without waiting, when the fresh version has ${label}`, async () => {
+    const { base, out, manifest } = await packTwo();
+    const srv = await tarballServer(out);
+    try {
+      const alpha = how === 'integrity' ? { integrity: manifest[1].integrity } : how;
+      const npm = stubNpm(base, {
+        state: { [ALPHA]: 'E404', '@butshouldwe/beta@1.2.3': 'E404' },
+        onPublish: { tarballBase: srv.registry, [ALPHA]: alpha },
+      });
+      const r = await run(['publish', out, '--registry', srv.registry], {
+        env: {
+          ...npm.env,
+          RELEASE_MANIFEST: JSON.stringify(manifest),
+          // a retry would show as extra views well inside this window
+          RELEASE_VERIFY_TIMEOUT_MS: '3000',
+          RELEASE_VERIFY_INTERVAL_MS: '200',
+        },
+      });
+      assert.notEqual(r.code, 0);
+      assert.match(r.stderr, reason);
+      assert.equal(viewCalls(npm.calls, ALPHA).length, 2);
+      assert.equal(publishCalls(npm.calls).length, 1);
+    } finally {
+      await srv.close();
+    }
+  });
+}
+
+test('publish fails at once when a fresh tarball downloads with other bytes', async () => {
+  const { base, out, manifest } = await packTwo();
+  const srv = await tarballServer(out, manifest[0].file);
+  try {
+    const npm = stubNpm(base, {
+      state: { [ALPHA]: 'E404', '@butshouldwe/beta@1.2.3': 'E404' },
+      onPublish: { tarballBase: srv.registry },
+    });
+    const r = await run(['publish', out, '--registry', srv.registry], {
+      env: {
+        ...npm.env,
+        RELEASE_MANIFEST: JSON.stringify(manifest),
+        RELEASE_VERIFY_TIMEOUT_MS: '3000',
+        RELEASE_VERIFY_INTERVAL_MS: '200',
+      },
+    });
+    assert.notEqual(r.code, 0);
+    assert.match(r.stderr, /downloadable tarball integrity mismatch/);
+    assert.equal(viewCalls(npm.calls, ALPHA).length, 2);
+  } finally {
+    await srv.close();
+  }
+});
+
+test('an exit-0 E404 payload before publishing means absent, so the package is published', async () => {
+  const { base, out, manifest } = await packTwo();
+  const srv = await tarballServer(out);
+  try {
+    const npm = stubNpm(base, {
+      state: { [ALPHA]: 'E404', '@butshouldwe/beta@1.2.3': 'E404' },
+      onPublish: { tarballBase: srv.registry },
+    });
+    // the first read of alpha answers with the payload and exit 0
+    const st = JSON.parse(readFileSync(join(base, 'npm-state.json'), 'utf8'));
+    st.lag = { [ALPHA]: { n: 1, as: 'E404_EXIT0' } };
+    writeFileSync(join(base, 'npm-state.json'), JSON.stringify(st));
+    const r = await run(['publish', out, '--registry', srv.registry], {
+      env: { ...npm.env, RELEASE_MANIFEST: JSON.stringify(manifest) },
+    });
+    assert.equal(r.code, 0, r.stderr + r.stdout);
+    assert.match(r.stdout, /published=2 skipped=0/);
+  } finally {
+    await srv.close();
+  }
+});
+
+for (const [value, label] of [
+  ['abc', 'text'],
+  ['-1', 'a negative'],
+  ['600001', 'over ten minutes'],
+  ['1.5', 'a fraction'],
+]) {
+  test(`publish refuses ${label} verify timeout before publishing`, async () => {
+    const { base, out, manifest } = await packTwo();
+    const npm = stubNpm(base, { state: { [ALPHA]: 'E404', '@butshouldwe/beta@1.2.3': 'E404' } });
+    const r = await run(['publish', out], {
+      env: { ...npm.env, RELEASE_MANIFEST: JSON.stringify(manifest), RELEASE_VERIFY_TIMEOUT_MS: value },
+    });
+    assert.notEqual(r.code, 0);
+    assert.match(r.stderr, /RELEASE_VERIFY_TIMEOUT_MS/);
+    assert.equal(publishCalls(npm.calls).length, 0);
+  });
+}
+
 test('dry run publishes nothing and asks for no provenance', async () => {
   const { base, out, manifest } = await packTwo();
   const npm = stubNpm(base, {
@@ -598,4 +856,8 @@ test('workflow: packs exactly the release packages, in dependency order', () => 
   assert.ok(m, 'pack invocation not found');
   assert.deepEqual(m[1].split(/\s*\\\n\s*|\s+/).filter(Boolean), RELEASE_PACKAGES);
   assert.doesNotMatch(code, /--registry/);
+});
+
+test('workflow: the publish step leaves post-publish wait timing at its defaults', () => {
+  assert.doesNotMatch(code, /RELEASE_VERIFY_(TIMEOUT|INTERVAL)_MS/);
 });
